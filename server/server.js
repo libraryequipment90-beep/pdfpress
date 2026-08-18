@@ -18,7 +18,7 @@ if (fs.existsSync(envFile)) {
 const app = express()
 const PORT = process.env.PORT || 3001
 const MAX_FILE_SIZE = 150 * 1024 * 1024
-const SESSION_TTL = 6 * 60 * 1000
+const SESSION_TTL = 30 * 60 * 1000
 
 const sessions = new Map()
 
@@ -118,7 +118,7 @@ function buildGsArgs(level, input, output) {
 function compressPdf(inputPath, outputPath, level) {
   return new Promise((resolve, reject) => {
     const args = buildGsArgs(level, inputPath, outputPath)
-    execFile('gs', args, { timeout: 120000, maxBuffer: 1024 * 1024 }, (err, stdout, stderr) => {
+    execFile('gs', args, { timeout: 600000, maxBuffer: 1024 * 1024 }, (err, stdout, stderr) => {
       if (err) {
         reject(new Error(stderr || err.message))
         return
@@ -155,6 +155,13 @@ function fmtSize(bytes) {
 
 app.use(express.json())
 
+app.use((req, res, next) => {
+  if (req.path.startsWith('/api/')) {
+    log(`${req.method} ${req.path}`)
+  }
+  next()
+})
+
 app.use('/api/auth', require('./auth'))
 
 app.get('/api/health', (req, res) => {
@@ -171,49 +178,74 @@ app.post('/api/compress', upload.array('files', 20), async (req, res) => {
 
   const sessionId = createSession()
   const session = sessions.get(sessionId)
-  const results = []
+  session.status = 'processing'
+  session.total = files.length
+  session.done = 0
+  session.error = null
+  session.results = []
 
-  try {
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i]
-      const inputPath = file.path
-      const outputPath = path.join(os.tmpdir(), crypto.randomBytes(16).toString('hex') + '.pdf')
-      const originalSize = fs.statSync(inputPath).size
-
-      await compressPdf(inputPath, outputPath, level)
-
-      const compressedSize = fs.statSync(outputPath).size
-      const originalName = file.originalname.replace(/\.pdf$/i, '') || 'document'
-
-      session.files.push({
-        inputPath,
-        outputPath,
-        originalName: originalName + '.pdf',
-        compressedName: originalName + '-compressed.pdf'
-      })
-
-      const saved = Math.max(0, originalSize - compressedSize)
-      const percent = originalSize > 0 ? Math.round((saved / originalSize) * 100) : 0
-
-      results.push({
-        id: i,
-        originalName: originalName + '.pdf',
-        compressedName: originalName + '-compressed.pdf',
-        originalSize,
-        compressedSize,
-        originalSizeText: fmtSize(originalSize),
-        compressedSizeText: fmtSize(compressedSize),
-        savedPercent: percent,
-        notSmaller: compressedSize >= originalSize
-      })
-    }
-
-    res.json({ sessionId, level, results })
-  } catch (err) {
+  processFiles(session, files, level).catch((err) => {
     log('Compression error: ' + err.message)
+    session.status = 'error'
+    session.error = 'Compression failed: ' + err.message
     cleanupSession(sessionId)
-    res.status(500).json({ error: 'Compression failed: ' + err.message })
+  })
+
+  res.json({ sessionId, level, total: files.length, status: 'processing' })
+})
+
+async function processFiles(session, files, level) {
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i]
+    const inputPath = file.path
+    const outputPath = path.join(os.tmpdir(), crypto.randomBytes(16).toString('hex') + '.pdf')
+    const originalSize = fs.statSync(inputPath).size
+
+    await compressPdf(inputPath, outputPath, level)
+
+    const compressedSize = fs.statSync(outputPath).size
+    const originalName = file.originalname.replace(/\.pdf$/i, '') || 'document'
+
+    session.files.push({
+      inputPath,
+      outputPath,
+      originalName: originalName + '.pdf',
+      compressedName: originalName + '-compressed.pdf'
+    })
+
+    const saved = Math.max(0, originalSize - compressedSize)
+    const percent = originalSize > 0 ? Math.round((saved / originalSize) * 100) : 0
+
+    session.results.push({
+      id: i,
+      originalName: originalName + '.pdf',
+      compressedName: originalName + '-compressed.pdf',
+      originalSize,
+      compressedSize,
+      originalSizeText: fmtSize(originalSize),
+      compressedSizeText: fmtSize(compressedSize),
+      savedPercent: percent,
+      notSmaller: compressedSize >= originalSize
+    })
+
+    session.done = i + 1
   }
+  session.status = 'done'
+}
+
+app.get('/api/compress-status/:sessionId', (req, res) => {
+  const session = sessions.get(req.params.sessionId)
+  if (!session) {
+    return res.status(404).json({ error: 'Session not found or expired.' })
+  }
+  res.json({
+    sessionId: req.params.sessionId,
+    status: session.status,
+    total: session.total || 0,
+    done: session.done || 0,
+    error: session.error || null,
+    results: session.results || []
+  })
 })
 
 app.get('/api/download/:sessionId/:index', (req, res) => {

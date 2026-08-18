@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Edit PDF — Add Text to PDF Online for Free</title>
+  <meta name="description" content="Edit PDF files online for free. Add, move and remove text on any PDF page right in your browser. Fast, free and 100% private — your files never leave your device." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>" />
+</head>
+<body>
+  <header class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="/">
+        <span class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="8" y1="13" x2="16" y2="13"></line>
+            <line x1="8" y1="17" x2="16" y2="17"></line>
+          </svg>
+        </span>
+        <span class="brand-name">PDF<em>press</em></span>
+      </a>
+      <nav class="nav-links" id="nav-links">
+        <a href="/#tool">Compress PDF</a>
+        <a href="/resize">Resize Images</a>
+        <a href="/edit-pdf">Edit PDF</a>
+        <a href="/#features">Features</a>
+        <a href="/#faq">FAQ</a>
+        <a id="nav-profile-btn" href="/profile" class="nav-profile-link hidden">Profile</a>
+      </nav>
+      <div class="nav-actions">
+        <a id="nav-login-btn" href="/signup" class="btn btn-outline btn-sm">Log in</a>
+        <a id="nav-auth-btn" href="/signup" class="btn btn-primary btn-sm">Sign up</a>
+        <button type="button" id="nav-toggle" class="nav-toggle" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero" id="top">
+    <div class="container hero-inner">
+      <h1 class="hero-title">Edit PDF</h1>
+      <p class="hero-sub">Add, move and remove text on any PDF page — right in your browser.</p>
+      <p class="hero-note">Free · No upload · 100% private · Works on any device</p>
+    </div>
+  </section>
+
+  <main class="container">
+    <section class="tool-card" id="tool">
+      <div class="tool-head">
+        <div class="tool-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"></path>
+          </svg>
+        </div>
+        <h2>Edit your PDF</h2>
+        <p>Upload a PDF and a full-screen editor opens where you can click any page to add text. Your file is edited locally and never uploaded.</p>
+      </div>
+
+      <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Select PDF file">
+        <div class="dz-inner">
+          <div class="dz-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5z"></path>
+            </svg>
+          </div>
+          <p class="dz-title"><strong>Drop your PDF here</strong></p>
+          <p class="dz-sub">or</p>
+          <button type="button" class="btn btn-primary btn-select">Select PDF</button>
+          <p class="dz-hint">One file at a time · up to 150 MB</p>
+        </div>
+        <input type="file" id="file-input" accept="application/pdf,.pdf" hidden />
+      </div>
+
+      <div id="loading" class="progress hidden">
+        <div class="progress-bar"><div id="loading-fill" class="progress-fill"></div></div>
+        <p id="loading-text" class="progress-text">Rendering PDF…</p>
+      </div>
+
+      <div id="error-box" class="error-box hidden"></div>
+    </section>
+
+    <section class="features" id="features">
+      <h2 class="section-title">Why use the PDF editor?</h2>
+      <div class="feature-grid">
+        <div class="feature">
+          <span class="feature-icon">⚡</span>
+          <h3>Instant editing</h3>
+          <p>Click a page, type your text and drag it anywhere. Changes appear immediately on screen.</p>
+        </div>
+        <div class="feature">
+          <span class="feature-icon">🔒</span>
+          <h3>100% private</h3>
+          <p>Your PDF is processed entirely in your browser. Nothing is ever uploaded to a server.</p>
+        </div>
+        <div class="feature">
+          <span class="feature-icon">🎨</span>
+          <h3>Style control</h3>
+          <p>Change the font size and color of every text box to match your document.</p>
+        </div>
+        <div class="feature">
+          <span class="feature-icon">📄</span>
+          <h3>Multi-page support</h3>
+          <p>Browse every page from the sidebar and edit as many pages as you like.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="how" id="how">
+      <h2 class="section-title">How to edit a PDF</h2>
+      <ol class="steps">
+        <li>
+          <span class="step-num">1</span>
+          <div><h3>Upload your PDF</h3><p>Drop your PDF or click “Select PDF”. A full-screen editor opens instantly.</p></div>
+        </li>
+        <li>
+          <span class="step-num">2</span>
+          <div><h3>Add your text</h3><p>Click anywhere on a page to place a text box, then drag it into position. Adjust size and color any time.</p></div>
+        </li>
+        <li>
+          <span class="step-num">3</span>
+          <div><h3>Download</h3><p>Click “Download” and your changes are saved into the original file.</p></div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="faq" id="faq">
+      <h2 class="section-title">Frequently asked questions</h2>
+      <div class="faq-list">
+        <details>
+          <summary>Is the PDF editor free to use?</summary>
+          <p>Yes, editing PDFs on PDFpress is completely free. There is no sign-up required and no limit on how many files you edit.</p>
+        </details>
+        <details>
+          <summary>Are my PDFs uploaded to a server?</summary>
+          <p>No. Your PDF is read and edited locally in your browser using your own device. Nothing is ever uploaded, which keeps your documents 100% private.</p>
+        </details>
+        <details>
+          <summary>Can I edit text that is already in the PDF?</summary>
+          <p>PDFs store text in a fixed layout, so rewriting existing text isn’t possible. Instead you can add, move and remove new text on any page, which is how most online PDF editors work.</p>
+        </details>
+        <details>
+          <summary>Will the layout of my PDF change?</summary>
+          <p>No. Only the text you add is included in the download. Images, fonts and page layout stay exactly as they were.</p>
+        </details>
+        <details>
+          <summary>Can I edit more than one page?</summary>
+          <p>Yes. Every page of your PDF is shown as a thumbnail in the sidebar — click one to open it and add text.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <p>© <span id="year"></span> PDFpress. All rights reserved.</p>
+      <p>Edit PDF files online — fast, free and secure.</p>
+    </div>
+  </footer>
+
+  <div id="editor-app" class="editor-app hidden" aria-label="PDF editor">
+    <header class="editor-bar">
+      <div class="editor-bar-left">
+        <a class="brand" href="/">
+          <span class="brand-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="8" y1="13" x2="16" y2="13"></line>
+              <line x1="8" y1="17" x2="16" y2="17"></line>
+            </svg>
+          </span>
+          <span class="brand-name">PDF<em>press</em></span>
+        </a>
+        <span class="editor-filename" id="editor-filename" title=""></span>
+      </div>
+      <div class="editor-tools">
+        <button type="button" id="add-text-btn" class="btn btn-outline btn-sm">+ Text</button>
+        <button type="button" id="delete-btn" class="btn btn-ghost btn-sm" disabled>Delete</button>
+        <label class="prop-field" title="Font size">
+          <span>Size</span>
+          <select id="font-size" class="prop-select">
+            <option value="8">8</option>
+            <option value="10">10</option>
+            <option value="12">12</option>
+            <option value="14">14</option>
+            <option value="16" selected>16</option>
+            <option value="18">18</option>
+            <option value="24">24</option>
+            <option value="32">32</option>
+            <option value="48">48</option>
+          </select>
+        </label>
+        <label class="prop-field" title="Text color">
+          <span>Color</span>
+          <input id="font-color" type="color" value="#000000" class="prop-color" />
+        </label>
+      </div>
+      <div class="editor-bar-right">
+        <button type="button" id="close-btn" class="btn btn-ghost btn-sm">Close</button>
+        <button type="button" id="download-btn" class="btn btn-primary btn-sm">Download</button>
+      </div>
+    </header>
+    <div class="editor-tip">Click the page to add text · Drag to move · Double-click to edit · Delete key to remove</div>
+    <div class="editor-body">
+      <aside class="editor-sidebar" id="editor-sidebar">
+        <div class="thumb-list" id="thumb-list"></div>
+      </aside>
+      <main class="editor-stage" id="editor-stage"></main>
+    </div>
+  </div>
+
+  <script type="module" src="/src/edit-pdf.js"></script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Resize Images — Resize JPG, PNG, GIF, BMP, WebP Online for Free</title>
+  <meta name="description" content="Resize images online for free. Change image size, convert to JPG, PNG or WebP, compress and download. Fast, private — images never leave your device." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖼️</text></svg>" />
+</head>
+<body>
+  <header class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="/">
+        <span class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="8" y1="13" x2="16" y2="13"></line>
+            <line x1="8" y1="17" x2="16" y2="17"></line>
+          </svg>
+        </span>
+        <span class="brand-name">PDF<em>press</em></span>
+      </a>
+      <nav class="nav-links" id="nav-links">
+        <a href="/#tool">Compress PDF</a>
+        <a href="/resize">Resize Images</a>
+        <a href="/edit-pdf">Edit PDF</a>
+        <a href="/#features">Features</a>
+        <a href="/#faq">FAQ</a>
+        <a id="nav-profile-btn" href="/profile" class="nav-profile-link hidden">Profile</a>
+      </nav>
+      <div class="nav-actions">
+        <a id="nav-login-btn" href="/signup" class="btn btn-outline btn-sm">Log in</a>
+        <a id="nav-auth-btn" href="/signup" class="btn btn-primary btn-sm">Sign up</a>
+        <button type="button" id="nav-toggle" class="nav-toggle" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero" id="top">
+    <div class="container hero-inner">
+      <h1 class="hero-title">Resize Images</h1>
+      <p class="hero-sub">Resize, convert and compress your images in seconds — right in your browser.</p>
+      <p class="hero-note">Free · No upload · 100% private · JPG, PNG, GIF, BMP, WebP</p>
+    </div>
+  </section>
+
+  <main class="container">
+    <section class="tool-card" id="tool">
+      <div class="tool-head">
+        <div class="tool-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <polyline points="21 15 16 10 5 21"></polyline>
+          </svg>
+        </div>
+        <h2>Resize your images</h2>
+        <p>Select up to 20 images and resize them all at once. Your photos are processed in your browser and never leave your device.</p>
+      </div>
+
+      <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Select image files">
+        <div class="dz-inner">
+          <div class="dz-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+          </div>
+          <p class="dz-title"><strong>Drop your images here</strong></p>
+          <p class="dz-sub">or</p>
+          <button type="button" class="btn btn-primary btn-select">Select images</button>
+          <p class="dz-hint">Up to 20 images · JPG, PNG, GIF, BMP, WebP</p>
+        </div>
+        <input type="file" id="file-input" accept="image/jpeg,image/png,image/gif,image/bmp,image/webp,.jpg,.jpeg,.png,.gif,.bmp,.webp" multiple hidden />
+      </div>
+
+      <div id="resize-settings" class="settings hidden">
+        <div class="settings-row">
+          <div class="settings-label">New size</div>
+          <div class="resize-size-row">
+            <div class="size-field">
+              <label class="size-field-label" for="size-width">Width</label>
+              <input id="size-width" class="size-input" type="number" min="1" value="800" />
+            </div>
+            <span class="size-sep">×</span>
+            <div class="size-field">
+              <label class="size-field-label" for="size-height">Height</label>
+              <input id="size-height" class="size-input" type="number" min="1" value="" />
+            </div>
+            <select id="size-unit" class="size-unit" aria-label="Unit">
+              <option value="px">pixels</option>
+              <option value="pct">percent</option>
+              <option value="in">inches</option>
+              <option value="cm">centimeters</option>
+            </select>
+            <label class="aspect-lock">
+              <input id="lock-aspect" type="checkbox" checked />
+              <span>Keep aspect ratio</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-label">Resolution</div>
+          <div class="resolution-row">
+            <input id="resolution" class="size-input" type="number" min="1" max="2000" value="72" />
+            <span class="resolution-unit">DPI</span>
+            <span class="resolution-hint">Print resolution · saved to JPG/PNG metadata</span>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-label">Resize mode</div>
+          <div class="level-options" id="mode-options">
+            <label class="level-pill">
+              <input type="radio" name="mode" value="fit" checked />
+              <span><strong>Fit</strong><small>Shrink to fit</small></span>
+            </label>
+            <label class="level-pill">
+              <input type="radio" name="mode" value="crop" />
+              <span><strong>Crop</strong><small>Fill &amp; crop</small></span>
+            </label>
+            <label class="level-pill">
+              <input type="radio" name="mode" value="stretch" />
+              <span><strong>Stretch</strong><small>Ignore ratio</small></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <div class="settings-label">Format &amp; quality</div>
+          <div class="level-options" id="format-options">
+            <label class="level-pill">
+              <input type="radio" name="format" value="jpeg" checked />
+              <span><strong>JPG</strong><small>Smallest</small></span>
+            </label>
+            <label class="level-pill">
+              <input type="radio" name="format" value="png" />
+              <span><strong>PNG</strong><small>Lossless</small></span>
+            </label>
+            <label class="level-pill">
+              <input type="radio" name="format" value="webp" />
+              <span><strong>WebP</strong><small>Modern</small></span>
+            </label>
+          </div>
+          <div class="quality-row">
+            <label for="quality">Quality</label>
+            <input id="quality" type="range" min="10" max="100" value="90" />
+            <span id="quality-value">90</span>
+          </div>
+          <div class="bg-row">
+            <label class="bg-option">
+              <input id="bg-transparent" type="checkbox" checked />
+              <span>Transparent background</span>
+            </label>
+            <label class="bg-option bg-color-option hidden">
+              <span>Background</span>
+              <input id="bg-color" type="color" value="#ffffff" />
+            </label>
+          </div>
+        </div>
+
+        <div class="settings-row">
+          <button type="button" id="resize-btn" class="btn btn-primary btn-lg">Resize images</button>
+        </div>
+      </div>
+
+      <div id="file-list" class="file-list"></div>
+
+      <div id="progress" class="progress hidden">
+        <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+        <p id="progress-text" class="progress-text">Resizing…</p>
+      </div>
+
+      <div id="results" class="results hidden">
+        <div class="results-head">
+          <h3>Your resized images are ready</h3>
+          <div class="results-actions">
+            <button type="button" id="download-all-btn" class="btn btn-primary">Download all</button>
+            <button type="button" id="reset-btn" class="btn btn-ghost">Start over</button>
+          </div>
+        </div>
+        <ul id="results-list" class="results-list"></ul>
+        <p class="results-note">Images are processed in your browser and never uploaded to our servers.</p>
+      </div>
+
+      <div id="error-box" class="error-box hidden"></div>
+    </section>
+
+    <section class="features" id="features">
+      <h2 class="section-title">Why use the image resizer?</h2>
+      <div class="feature-grid">
+        <div class="feature">
+          <span class="feature-icon">⚡</span>
+          <h3>Instant results</h3>
+          <p>Images are processed locally in your browser — no waiting for uploads, no queues.</p>
+        </div>
+        <div class="feature">
+          <span class="feature-icon">🔒</span>
+          <h3>100% private</h3>
+          <p>Your photos never leave your device. Perfect for personal and sensitive images.</p>
+        </div>
+        <div class="feature">
+          <span class="feature-icon">🎛️</span>
+          <h3>Full control</h3>
+          <p>Set exact pixel sizes or percentages, pick a fit mode, format and quality level.</p>
+        </div>
+        <div class="feature">
+          <span class="feature-icon">📦</span>
+          <h3>Batch friendly</h3>
+          <p>Resize up to 20 images at once and download them all in one go.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="how" id="how">
+      <h2 class="section-title">How to resize an image</h2>
+      <ol class="steps">
+        <li>
+          <span class="step-num">1</span>
+          <div><h3>Upload your image</h3><p>Drop your JPG, PNG, GIF, BMP or WebP files or click “Select images”.</p></div>
+        </li>
+        <li>
+          <span class="step-num">2</span>
+          <div><h3>Choose your size</h3><p>Enter width and height in pixels or a percentage, then pick a fit mode and format.</p></div>
+        </li>
+        <li>
+          <span class="step-num">3</span>
+          <div><h3>Download</h3><p>Grab your resized images individually or all at once and share them anywhere.</p></div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="faq" id="faq">
+      <h2 class="section-title">Frequently asked questions</h2>
+      <div class="faq-list">
+        <details>
+          <summary>Is the image resizer free to use?</summary>
+          <p>Yes, resizing images on PDFpress is completely free. There are no limits on the number of images and no sign-up required.</p>
+        </details>
+        <details>
+          <summary>Are my images uploaded to a server?</summary>
+          <p>No. All images are processed locally in your browser using your device’s own processing power. Nothing is ever uploaded, which keeps your images 100% private.</p>
+        </details>
+        <details>
+          <summary>What image formats are supported?</summary>
+          <p>You can resize JPG, PNG, GIF, BMP and WebP images, and save the result as JPG, PNG or WebP.</p>
+        </details>
+        <details>
+          <summary>Will resizing reduce image quality?</summary>
+          <p>Reducing the pixel dimensions slightly softens fine detail, which is normal. For photos, JPG at 90% quality gives an excellent balance of size and quality.</p>
+        </details>
+        <details>
+          <summary>Can I resize several images at the same time?</summary>
+          <p>Yes! Select or drop up to 20 images and they will all be resized with the same settings. Download them one by one or all together.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <p>© <span id="year"></span> PDFpress. All rights reserved.</p>
+      <p>Resize image file size online — fast, free and secure.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/src/resize.js"></script>
+</body>
+</html>

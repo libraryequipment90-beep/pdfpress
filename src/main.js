@@ -18,6 +18,7 @@ const errorBox = document.getElementById('error-box')
 let selectedFiles = []
 let sessionId = null
 let resultData = []
+let pollTimer = null
 
 const FILE_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>`
 
@@ -43,6 +44,7 @@ function resetTool() {
   selectedFiles = []
   sessionId = null
   resultData = []
+  pollTimer = null
   fileInput.value = ''
   renderFileList()
   compressSettings.classList.add('hidden')
@@ -191,10 +193,7 @@ function compress() {
 
     if (xhr.status >= 200 && xhr.status < 300 && data) {
       sessionId = data.sessionId
-      resultData = data.results
-      progressText.textContent = 'Compressing…'
-      progressFill.style.width = '100%'
-      setTimeout(showResults, 300)
+      pollStatus()
     } else {
       failCompress(data && data.error ? data.error : 'Something went wrong. Please try again.')
     }
@@ -202,6 +201,38 @@ function compress() {
 
   xhr.onerror = () => failCompress('Network error. Please check your connection and try again.')
   xhr.send(formData)
+}
+
+async function pollStatus() {
+  try {
+    const res = await fetch(`/api/compress-status/${sessionId}`)
+    const data = await res.json()
+
+    if (!res.ok || !sessionId) {
+      failCompress(data && data.error ? data.error : 'Session expired. Please try again.')
+      return
+    }
+
+    if (data.status === 'error') {
+      failCompress(data.error || 'Compression failed. Please try again.')
+      return
+    }
+
+    if (data.status === 'done') {
+      resultData = data.results
+      progressText.textContent = 'Compressing…'
+      progressFill.style.width = '100%'
+      setTimeout(showResults, 300)
+      return
+    }
+
+    const pct = Math.round((data.done / data.total) * 100)
+    progressFill.style.width = pct + '%'
+    progressText.textContent = `Compressing ${data.done} of ${data.total}…`
+    pollTimer = setTimeout(pollStatus, 1200)
+  } catch (e) {
+    failCompress('Unable to check compression status. Please try again.')
+  }
 }
 
 function failCompress(msg) {
