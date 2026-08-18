@@ -1,0 +1,17 @@
+{
+  "name": "pdfpress",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Compress PDF - a single-tool website to reduce PDF file size",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "server": "node server/server.js"
+  },
+  "dependencies": {
+    "vite": "^5.4.0"
+  },
+  "devDependencies": {}
+}

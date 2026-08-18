@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Compress PDF — Reduce PDF File Size Online for Free</title>
+  <meta name="description" content="Compress PDF files online for free. Reduce the size of your PDF without losing quality. Fast, secure and private." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗜️</text></svg>" />
+</head>
+<body>
+  <header class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="#top">
+        <span class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="8" y1="13" x2="16" y2="13"></line>
+            <line x1="8" y1="17" x2="16" y2="17"></line>
+          </svg>
+        </span>
+        <span class="brand-name">PDF<em>press</em></span>
+      </a>
+      <nav class="nav-links">
+        <a href="#tool">Compress PDF</a>
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero" id="top">
+    <div class="container hero-inner">
+      <h1 class="hero-title">Compress PDF</h1>
+      <p class="hero-sub">Reduce the file size of your PDFs without compromising quality.</p>
+      <p class="hero-note">Free · Unlimited files · No sign-up required · 100% private</p>
+    </div>
+  </section>
+
+  <main class="container">
+    <section class="tool-card" id="tool">
+      <div class="tool-head">
+        <div class="tool-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="8" y1="13" x2="16" y2="13"></line>
+            <line x1="8" y1="17" x2="16" y2="17"></line>
+          </svg>
+        </div>
+        <h2>Compress PDF files</h2>
+        <p>Select up to 20 PDF files and compress them all at once. Files are processed in your browser and deleted automatically after 30 minutes.</p>
+      </div>
+
+      <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Select PDF files">
+        <div class="dz-inner">
+          <div class="dz-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+          </div>
+          <p class="dz-title"><strong>Drop your PDF files here</strong></p>
+          <p class="dz-sub">or</p>
+          <button type="button" class="btn btn-primary btn-select">Select PDF file</button>
+          <p class="dz-hint">Up to 20 files · 150 MB each</p>
+        </div>
+        <input type="file" id="file-input" accept="application/pdf,.pdf" multiple hidden />
+      </div>
+
+      <div id="compress-settings" class="settings hidden">
+        <div class="settings-row">
+          <div class="settings-label">Compression level</div>
+          <div class="level-options" id="level-options">
+            <label class="level-pill">
+              <input type="radio" name="level" value="extreme" />
+              <span><strong>Extreme</strong><small>Smallest file</small></span>
+            </label>
+            <label class="level-pill checked">
+              <input type="radio" name="level" value="recommended" checked />
+              <span><strong>Recommended</strong><small>Best balance</small></span>
+            </label>
+            <label class="level-pill">
+              <input type="radio" name="level" value="less" />
+              <span><strong>Less</strong><small>Best quality</small></span>
+            </label>
+          </div>
+        </div>
+        <div class="settings-row">
+          <button type="button" id="compress-btn" class="btn btn-primary btn-lg">Compress PDF</button>
+        </div>
+      </div>
+
+      <div id="file-list" class="file-list"></div>
+
+      <div id="progress" class="progress hidden">
+        <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+        <p id="progress-text" class="progress-text">Compressing…</p>
+      </div>
+
+      <div id="results" class="results hidden">
+        <div class="results-head">
+          <h3>Your compressed PDFs are ready</h3>
+          <div class="results-actions">
+            <button type="button" id="download-all-btn" class="btn btn-primary">Download all</button>
+            <button type="button" id="reset-btn" class="btn btn-ghost">Start over</button>
+          </div>
+        </div>
+        <ul id="results-list" class="results-list"></ul>
+        <p class="results-note">Files are automatically deleted from our servers 30 minutes after upload.</p>
+      </div>
+
+      <div id="error-box" class="error-box hidden"></div>
+    </section>
+
+    <section class="features" id="features">
+      <h2 class="section-title">Why use PDFpress?</h2>
+      <div class="feature-grid">
+        <div class="feature">
+          <span class="feature-icon">⚡</span>
+          <h3>Lightning fast</h3>
+          <p>Advanced compression engine shrinks files in seconds — no more email size limits.</p>
+        </div>
+        <div class="feature">
+          <span class="feature-icon">🔒</span>
+          <h3>Secure & private</h3>
+          <p>Your files are never shared, and all uploads are automatically deleted after 30 minutes.</p>
+        </div>
+        <div class="feature">
+          <span class="feature-icon">🌍</span>
+          <h3>Works everywhere</h3>
+          <p>Compress PDFs from any device — desktop, tablet or phone. No installation needed.</p>
+        </div>
+        <div class="feature">
+          <span class="feature-icon">🎯</span>
+          <h3>Three quality levels</h3>
+          <p>Choose between extreme, recommended or less compression to match your needs.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="how" id="how">
+      <h2 class="section-title">How to compress a PDF</h2>
+      <ol class="steps">
+        <li>
+          <span class="step-num">1</span>
+          <div><h3>Upload your PDF</h3><p>Drag and drop files or click “Select PDF file”. You can add up to 20 at once.</p></div>
+        </li>
+        <li>
+          <span class="step-num">2</span>
+          <div><h3>Pick a level</h3><p>Choose extreme, recommended or less compression, then hit Compress PDF.</p></div>
+        </li>
+        <li>
+          <span class="step-num">3</span>
+          <div><h3>Download</h3><p>Grab your compressed files individually or as a single ZIP and share them easily.</p></div>
+        </li>
+      </ol>
+    </section>
+
+    <section class="faq" id="faq">
+      <h2 class="section-title">Frequently asked questions</h2>
+      <div class="faq-list">
+        <details>
+          <summary>Is PDFpress free to use?</summary>
+          <p>Yes, compressing PDFs on PDFpress is completely free. There are no limits on the number of files and no sign-up required.</p>
+        </details>
+        <details>
+          <summary>Are my PDF files private and secure?</summary>
+          <p>Absolutely. Your files are processed on our servers only to create the compressed version, and they are automatically deleted 30 minutes after processing. We never share or sell your data.</p>
+        </details>
+        <details>
+          <summary>Will compression reduce the quality of my PDF?</summary>
+          <p>We use smart compression that reduces file size while preserving the visual quality of your document. For documents with heavy images, try the “Recommended” or “Less” compression level to keep maximum quality.</p>
+        </details>
+        <details>
+          <summary>What is the maximum file size I can upload?</summary>
+          <p>Each file can be up to 150 MB, and you can upload up to 20 files at once. There are no daily limits.</p>
+        </details>
+        <details>
+          <summary>Can I compress several PDF files at the same time?</summary>
+          <p>Yes! Select or drop multiple PDFs and we will compress them all in a single batch. Download them one by one or as one ZIP file.</p>
+        </details>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <p>© <span id="year"></span> PDFpress. All rights reserved.</p>
+      <p>Reduce PDF file size online — fast, free and secure.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
