@@ -1,4 +1,5 @@
 import './style.css'
+import { initNavAuth, initNavToggle } from './nav-auth.js'
 
 const dropzone = document.getElementById('dropzone')
 const fileInput = document.getElementById('file-input')
@@ -252,3 +253,5 @@ document.querySelectorAll('#level-options input[name="level"]').forEach((radio) 
 compressBtn.addEventListener('click', compress)
 
 document.getElementById('year').textContent = new Date().getFullYear()
+initNavToggle()
+initNavAuth()

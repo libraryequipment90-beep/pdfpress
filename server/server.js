@@ -7,10 +7,18 @@ const os = require('os')
 const path = require('path')
 const crypto = require('crypto')
 
+const envFile = path.join(__dirname, '.env')
+if (fs.existsSync(envFile)) {
+  for (const line of fs.readFileSync(envFile, 'utf8').split('\n')) {
+    const m = line.match(/^\s*([\w.-]+)\s*=\s*(.*)\s*$/)
+    if (m && !(m[1] in process.env)) process.env[m[1]] = m[2]
+  }
+}
+
 const app = express()
 const PORT = process.env.PORT || 3001
 const MAX_FILE_SIZE = 150 * 1024 * 1024
-const SESSION_TTL = 30 * 60 * 1000
+const SESSION_TTL = 6 * 60 * 1000
 
 const sessions = new Map()
 
@@ -43,6 +51,16 @@ const LEVELS = {
     grayImageResolution: 40,
     monoImageResolution: 100,
     jpegQuality: 50,
+    autoFilter: false,
+    compatibility: '1.4'
+  },
+  'less-extreme': {
+    label: 'Less extreme compression',
+    settings: '/ebook',
+    colorImageResolution: 70,
+    grayImageResolution: 70,
+    monoImageResolution: 150,
+    jpegQuality: 65,
     autoFilter: false,
     compatibility: '1.4'
   },
@@ -136,6 +154,8 @@ function fmtSize(bytes) {
 }
 
 app.use(express.json())
+
+app.use('/api/auth', require('./auth'))
 
 app.get('/api/health', (req, res) => {
   res.json({ ok: true })

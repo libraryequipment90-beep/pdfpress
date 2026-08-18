@@ -24,12 +24,20 @@
         </span>
         <span class="brand-name">PDF<em>press</em></span>
       </a>
-      <nav class="nav-links">
+      <nav class="nav-links" id="nav-links">
         <a href="#tool">Compress PDF</a>
         <a href="#features">Features</a>
         <a href="#how">How it works</a>
         <a href="#faq">FAQ</a>
+        <a id="nav-profile-btn" href="/profile" class="nav-profile-link hidden">Profile</a>
       </nav>
+      <div class="nav-actions">
+        <a id="nav-login-btn" href="/signup" class="btn btn-outline btn-sm">Log in</a>
+        <a id="nav-auth-btn" href="/signup" class="btn btn-primary btn-sm">Sign up</a>
+        <button type="button" id="nav-toggle" class="nav-toggle" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -81,6 +89,10 @@
               <input type="radio" name="level" value="extreme" />
               <span><strong>Extreme</strong><small>Smallest file</small></span>
             </label>
+            <label class="level-pill">
+              <input type="radio" name="level" value="less-extreme" />
+              <span><strong>Less Extreme</strong><small>Small file</small></span>
+            </label>
             <label class="level-pill checked">
               <input type="radio" name="level" value="recommended" checked />
               <span><strong>Recommended</strong><small>Best balance</small></span>
@@ -112,7 +124,7 @@
           </div>
         </div>
         <ul id="results-list" class="results-list"></ul>
-        <p class="results-note">Files are automatically deleted from our servers 30 minutes after upload.</p>
+        <p class="results-note">Files are automatically deleted from our servers 6 minutes after upload.</p>
       </div>
 
       <div id="error-box" class="error-box hidden"></div>

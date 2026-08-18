@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your profile — PDFpress</title>
+  <meta name="description" content="View your PDFpress profile, account details and plan." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗜️</text></svg>" />
+</head>
+<body>
+  <header class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="/">
+        <span class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="8" y1="13" x2="16" y2="13"></line>
+            <line x1="8" y1="17" x2="16" y2="17"></line>
+          </svg>
+        </span>
+        <span class="brand-name">PDF<em>press</em></span>
+      </a>
+      <nav class="nav-links" id="nav-links">
+        <a href="/#tool">Compress PDF</a>
+        <a href="/#features">Features</a>
+        <a href="/#faq">FAQ</a>
+        <a id="nav-profile-btn" href="/profile" class="nav-profile-link hidden">Profile</a>
+      </nav>
+      <div class="nav-actions">
+        <a id="nav-login-btn" href="/signup" class="btn btn-outline btn-sm">Log in</a>
+        <a id="nav-auth-btn" href="/signup" class="btn btn-primary btn-sm">Sign up</a>
+        <button type="button" id="nav-toggle" class="nav-toggle" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="signup-card" id="profile-login">
+      <div class="signup-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+      </div>
+      <h1>Sign in to view your profile</h1>
+      <p class="signup-sub">You need to be signed in to see your account details.</p>
+      <a href="/signup" class="btn btn-primary">Go to sign up</a>
+    </section>
+
+    <section class="signup-card hidden" id="profile-panel">
+      <h1>Your profile</h1>
+      <img id="profile-avatar" class="profile-avatar" alt="Profile picture" />
+      <p class="account-name" id="profile-name"></p>
+      <p class="account-email" id="profile-email"></p>
+
+      <div class="profile-details">
+        <div class="profile-row">
+          <span>Login provider</span>
+          <strong id="profile-provider"></strong>
+        </div>
+        <div class="profile-row">
+          <span>Account created</span>
+          <strong id="profile-created"></strong>
+        </div>
+        <div class="profile-row">
+          <span>Current plan</span>
+          <strong><span class="plan-badge">Free</span></strong>
+        </div>
+      </div>
+
+      <div class="account-actions">
+        <a href="/" class="btn btn-primary">Compress PDF</a>
+        <button id="sign-out-btn" class="btn btn-ghost" type="button">Sign out</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <p>© <span id="year"></span> PDFpress. All rights reserved.</p>
+      <p>Reduce PDF file size online — fast, free and secure.</p>
+    </div>
+  </footer>
+
+  <script type="module" src="/src/profile.js"></script>
+</body>
+</html>
