@@ -614,6 +614,7 @@ document.addEventListener('keydown', (e) => {
     }
   }
   if (e.key === 'Escape' && selected) {
+    if (selected.editing) exitEdit(selected)
     selectBox(null)
   }
 })
