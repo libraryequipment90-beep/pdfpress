@@ -180,8 +180,16 @@
         <span class="editor-filename" id="editor-filename" title=""></span>
       </div>
       <div class="editor-tools">
+        <button type="button" id="undo-btn" class="btn btn-ghost btn-sm" title="Undo (Ctrl+Z)">↶ Undo</button>
+        <button type="button" id="redo-btn" class="btn btn-ghost btn-sm" title="Redo (Ctrl+Y)">↷ Redo</button>
+        <span class="tool-sep"></span>
         <button type="button" id="add-text-btn" class="btn btn-outline btn-sm">+ Text</button>
         <button type="button" id="delete-btn" class="btn btn-ghost btn-sm" disabled>Delete</button>
+        <span class="tool-sep"></span>
+        <button type="button" id="bold-btn" class="btn btn-ghost btn-sm fmt-btn" title="Bold (Ctrl+B)"><strong>B</strong></button>
+        <button type="button" id="italic-btn" class="btn btn-ghost btn-sm fmt-btn" title="Italic (Ctrl+I)"><em>I</em></button>
+        <button type="button" id="underline-btn" class="btn btn-ghost btn-sm fmt-btn" title="Underline (Ctrl+U)"><u>U</u></button>
+        <span class="tool-sep"></span>
         <label class="prop-field" title="Font size">
           <span>Size</span>
           <select id="font-size" class="prop-select">
@@ -196,17 +204,22 @@
             <option value="48">48</option>
           </select>
         </label>
-        <label class="prop-field" title="Text color">
+        <label class="prop-field" title="Text color / shape outline">
           <span>Color</span>
           <input id="font-color" type="color" value="#000000" class="prop-color" />
         </label>
+        <span class="tool-sep"></span>
+        <button type="button" id="shape-rect" class="btn btn-outline btn-sm shape-btn" title="Rectangle">Rect</button>
+        <button type="button" id="shape-ellipse" class="btn btn-outline btn-sm shape-btn" title="Ellipse">Ellipse</button>
+        <button type="button" id="shape-line" class="btn btn-outline btn-sm shape-btn" title="Line">Line</button>
+        <button type="button" id="shape-arrow" class="btn btn-outline btn-sm shape-btn" title="Arrow">Arrow</button>
       </div>
       <div class="editor-bar-right">
         <button type="button" id="close-btn" class="btn btn-ghost btn-sm">Close</button>
         <button type="button" id="download-btn" class="btn btn-primary btn-sm">Download</button>
       </div>
     </header>
-    <div class="editor-tip">Click the page to add text · Drag to move · Double-click to edit · Delete key to remove</div>
+    <div class="editor-tip">Click existing text to edit · Click empty space to add text · Drag to move · Ctrl+Z to undo · Pick Rect/Ellipse/Line/Arrow to draw shapes</div>
     <div class="editor-body">
       <aside class="editor-sidebar" id="editor-sidebar">
         <div class="thumb-list" id="thumb-list"></div>

@@ -20,14 +20,28 @@ const addTextBtn = document.getElementById('add-text-btn')
 const deleteBtn = document.getElementById('delete-btn')
 const downloadBtn = document.getElementById('download-btn')
 const closeBtn = document.getElementById('close-btn')
+const undoBtn = document.getElementById('undo-btn')
+const redoBtn = document.getElementById('redo-btn')
+const boldBtn = document.getElementById('bold-btn')
+const italicBtn = document.getElementById('italic-btn')
+const underlineBtn = document.getElementById('underline-btn')
 const fontSizeSel = document.getElementById('font-size')
 const fontColorInput = document.getElementById('font-color')
+const shapeBtns = {
+  rect: document.getElementById('shape-rect'),
+  ellipse: document.getElementById('shape-ellipse'),
+  line: document.getElementById('shape-line'),
+  arrow: document.getElementById('shape-arrow'),
+}
 
 const DEFAULT_TEXT = 'Text'
 const STAGE_MAX_WIDTH = 980
 const THUMB_WIDTH = 150
 const MAX_ZOOM = 1.5
 const REDACT_PAD = 1.5
+const ASCENT = 0.8
+const DESCENT = 0.22
+const SVGNS = 'http://www.w3.org/2000/svg'
 
 let pdfjsDoc = null
 let pdfLibDoc = null
@@ -35,17 +49,43 @@ let originalName = 'document.pdf'
 let pages = []
 let selected = null
 let activeIndex = 0
+let placeMode = null
+let justDrewShape = false
 
-const FONT_MAP = [
-  { re: /helvetica|arial|liberationsans/i, font: StandardFonts.Helvetica },
-  { re: /times|liberationserif/i, font: StandardFonts.TimesRoman },
-  { re: /courier|liberationmono/i, font: StandardFonts.Courier },
-]
+let history = []
+let historyIndex = -1
 
-function mapFont(name) {
+const FONT_FAMILIES = {
+  Helvetica: {
+    normal: StandardFonts.Helvetica,
+    bold: StandardFonts.HelveticaBold,
+    italic: StandardFonts.HelveticaOblique,
+    boldItalic: StandardFonts.HelveticaBoldOblique,
+  },
+  TimesRoman: {
+    normal: StandardFonts.TimesRoman,
+    bold: StandardFonts.TimesRomanBold,
+    italic: StandardFonts.TimesRomanItalic,
+    boldItalic: StandardFonts.TimesRomanBoldItalic,
+  },
+  Courier: {
+    normal: StandardFonts.Courier,
+    bold: StandardFonts.CourierBold,
+    italic: StandardFonts.CourierOblique,
+    boldItalic: StandardFonts.CourierBoldOblique,
+  },
+}
+
+function mapFamily(name) {
   const n = String(name || '')
-  const match = FONT_MAP.find((f) => f.re.test(n))
-  return match ? match.font : StandardFonts.Helvetica
+  if (/courier|liberationmono/i.test(n)) return 'Courier'
+  if (/times|liberationserif/i.test(n)) return 'TimesRoman'
+  return 'Helvetica'
+}
+
+function pickFont(family, bold, italic) {
+  const f = FONT_FAMILIES[family] || FONT_FAMILIES.Helvetica
+  return bold && italic ? f.boldItalic : bold ? f.bold : italic ? f.italic : f.normal
 }
 
 function showError(msg) {
@@ -87,173 +127,497 @@ function hexToRgb(hex) {
   return rgb(((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255)
 }
 
+/* ===== Undo / Redo ===== */
+
+function serializeItem(it) {
+  if (it.type === 'shape') {
+    return {
+      type: 'shape',
+      shapeType: it.shapeType,
+      x1: it.x1,
+      y1: it.y1,
+      x2: it.x2,
+      y2: it.y2,
+      strokeColor: it.strokeColor,
+      strokeWidth: it.strokeWidth,
+    }
+  }
+  return {
+    type: 'text',
+    kind: it.kind,
+    text: it.text,
+    origText: it.origText,
+    changed: it.changed,
+    fontSize: it.fontSize,
+    color: it.color,
+    bold: it.bold,
+    italic: it.italic,
+    underline: it.underline,
+    left: it.left,
+    top: it.top,
+    x0: it.x0,
+    baseline: it.baseline,
+    sizePts: it.sizePts,
+    widthPts: it.widthPts,
+    fontName: it.fontName,
+  }
+}
+
+function captureState() {
+  return pages.map((p) => ({ items: p.items.map(serializeItem) }))
+}
+
+function commit() {
+  history = history.slice(0, historyIndex + 1)
+  history.push(captureState())
+  if (history.length > 60) history.shift()
+  historyIndex = history.length - 1
+}
+
+function applyState(state) {
+  pages.forEach((page, i) => {
+    page.items = []
+    page.layer.innerHTML = ''
+    page.redactCtx.clearRect(0, 0, page.redactCtx.canvas.width, page.redactCtx.canvas.height)
+    for (const it of state[i].items) {
+      if (it.type === 'shape') rebuildShape(page, it)
+      else rebuildText(page, it)
+    }
+  })
+  if (selected) selectBox(null)
+}
+
+function undo() {
+  if (historyIndex > 0) {
+    historyIndex--
+    applyState(history[historyIndex])
+  }
+}
+
+function redo() {
+  if (historyIndex < history.length - 1) {
+    historyIndex++
+    applyState(history[historyIndex])
+  }
+}
+
+/* ===== Selection ===== */
+
 function selectBox(tb) {
   if (selected && selected.el) selected.el.classList.remove('selected')
   selected = tb
   if (tb) {
     tb.el.classList.add('selected')
-    fontSizeSel.value = String(tb.fontSize)
-    fontColorInput.value = tb.color
-    deleteBtn.disabled = tb.kind === 'existing'
+    if (tb.type === 'text') {
+      fontSizeSel.value = String(tb.fontSize)
+      fontColorInput.value = tb.color
+      boldBtn.classList.toggle('active', !!tb.bold)
+      italicBtn.classList.toggle('active', !!tb.italic)
+      underlineBtn.classList.toggle('active', !!tb.underline)
+      deleteBtn.disabled = tb.kind === 'existing'
+    } else {
+      fontColorInput.value = tb.strokeColor
+      deleteBtn.disabled = false
+    }
   } else {
     deleteBtn.disabled = true
   }
+  updateShapeHandles()
 }
 
-function paintRedact(box) {
-  const page = box.page
-  if (!page.redactCtx || !box.redact) return
+function updateShapeHandles() {
+  pages.forEach((p) => p.items.forEach((it) => {
+    if (it.type === 'shape' && it.el) it.el.classList.toggle('selected', it === selected)
+  }))
+}
+
+/* ===== Redaction ===== */
+
+function redactRectFor(item) {
+  const scale = item.page ? item.page.scale : 1
+  const pad = REDACT_PAD * scale
+  const ascent = item.sizePts * ASCENT
+  const descent = item.sizePts * DESCENT
+  return {
+    x: (item.x0 - REDACT_PAD) * scale,
+    y: (item.pageH - item.baseline - ascent - REDACT_PAD) * scale,
+    w: (item.widthPts + REDACT_PAD * 2) * scale,
+    h: (ascent + descent + REDACT_PAD * 2) * scale,
+  }
+}
+
+function paintRedact(page, item) {
+  const r = item.redact || redactRectFor({ ...item, page })
+  item.redact = r
   page.redactCtx.save()
-  page.redactCtx.globalAlpha = 1
   page.redactCtx.fillStyle = '#ffffff'
-  page.redactCtx.fillRect(box.redact.x, box.redact.y, box.redact.w, box.redact.h)
+  page.redactCtx.fillRect(r.x, r.y, r.w, r.h)
   page.redactCtx.restore()
 }
 
-function eraseRedact(box) {
-  const page = box.page
-  if (!page.redactCtx || !box.redact) return
+function eraseRedact(page, item) {
+  if (!item.redact) return
   page.redactCtx.save()
   page.redactCtx.globalCompositeOperation = 'destination-out'
-  page.redactCtx.fillRect(box.redact.x, box.redact.y, box.redact.w, box.redact.h)
+  page.redactCtx.fillRect(item.redact.x, item.redact.y, item.redact.w, item.redact.h)
   page.redactCtx.restore()
 }
 
-function exitEdit(tb) {
-  if (!tb.editing) return
-  tb.editing = false
-  tb.el.contentEditable = 'false'
-  tb.el.classList.remove('editing')
-  const raw = (tb.el.innerText || '').replace(/\u00a0/g, ' ').replace(/^\n+|\n+$/g, '')
-  tb.text = raw.length ? raw : ' '
-
-  if (tb.kind === 'existing') {
-    if (tb.text === tb.origText) {
-      eraseRedact(tb)
-      tb.changed = false
-      tb.el.style.color = 'transparent'
-    } else {
-      tb.changed = true
-      tb.el.style.color = tb.color
-      updateRedactFromEl(tb)
+function repaintRedactions(page) {
+  page.redactCtx.clearRect(0, 0, page.redactCtx.canvas.width, page.redactCtx.canvas.height)
+  for (const it of page.items) {
+    if (it.type === 'text' && it.kind === 'existing' && it.changed) {
+      it.redact = null
+      paintRedact(page, it)
     }
-    tb.el.textContent = tb.text
   }
 }
 
-function enterEdit(tb) {
-  if (tb.kind === 'existing' && !tb.changed) {
-    paintRedact(tb)
+function updateRedactFromEl(page, it) {
+  const wrapRect = page.wrap.getBoundingClientRect()
+  const elRect = it.el.getBoundingClientRect()
+  const pad = REDACT_PAD * page.scale
+  it.redact = {
+    x: elRect.left - wrapRect.left - pad,
+    y: elRect.top - wrapRect.top - pad,
+    w: elRect.width + pad * 2,
+    h: elRect.height + pad * 2,
   }
-  tb.editing = true
-  tb.el.contentEditable = 'true'
-  tb.el.classList.add('editing')
-  tb.el.style.color = tb.color
-  tb.el.focus()
+  eraseRedact(page, it)
+  paintRedact(page, it)
+}
+
+/* ===== Text boxes ===== */
+
+function exitEdit(it) {
+  if (!it.editing) return
+  it.editing = false
+  it.el.contentEditable = 'false'
+  it.el.classList.remove('editing')
+  const raw = (it.el.innerText || '').replace(/\u00a0/g, ' ').replace(/^\n+|\n+$/g, '')
+  const newText = raw.length ? raw : ' '
+
+  if (it.kind === 'existing') {
+    const didChange = newText !== it.origText
+    if (!didChange) {
+      it.text = newText
+      it.changed = false
+      it.el.style.color = 'transparent'
+      it.el.textContent = it.text
+      repaintRedactions(it.page)
+      selectBox(it)
+      return
+    }
+    it.text = newText
+    it.changed = true
+    it.el.style.color = it.color
+    it.el.textContent = it.text
+    updateRedactFromEl(it.page, it)
+    commit()
+    return
+  }
+
+  if (newText === it.text) return
+  it.text = newText
+  commit()
+}
+
+function enterEdit(it) {
+  it.editing = true
+  it.el.contentEditable = 'true'
+  it.el.classList.add('editing')
+  it.el.style.color = it.color
+  it.el.focus()
   const range = document.createRange()
-  range.selectNodeContents(tb.el)
+  range.selectNodeContents(it.el)
   const sel = window.getSelection()
   sel.removeAllRanges()
   sel.addRange(range)
-  tb.el.addEventListener('blur', () => exitEdit(tb), { once: true })
+  it.el.addEventListener('blur', () => exitEdit(it), { once: true })
 }
 
-function startDrag(e, tb) {
+function startDrag(e, it, update, onUp) {
   const startX = e.clientX
   const startY = e.clientY
-  const origLeft = tb.left
-  const origTop = tb.top
   const onMove = (ev) => {
-    tb.left = Math.max(0, origLeft + ev.clientX - startX)
-    tb.top = Math.max(0, origTop + ev.clientY - startY)
-    tb.el.style.left = tb.left + 'px'
-    tb.el.style.top = tb.top + 'px'
+    update(ev.clientX - startX, ev.clientY - startY)
   }
-  const onUp = () => {
+  const done = () => {
     document.removeEventListener('mousemove', onMove)
-    document.removeEventListener('mouseup', onUp)
+    document.removeEventListener('mouseup', done)
+    if (onUp) onUp()
   }
   document.addEventListener('mousemove', onMove)
-  document.addEventListener('mouseup', onUp)
+  document.addEventListener('mouseup', done)
 }
 
-function setupBoxEvents(page, tb) {
-  const el = tb.el
+function applyTextStyle(it) {
+  const el = it.el
+  el.style.fontWeight = it.bold ? '700' : '400'
+  el.style.fontStyle = it.italic ? 'italic' : 'normal'
+  el.style.textDecoration = it.underline ? 'underline' : 'none'
+}
+
+function createTextEl(page, it) {
+  const el = document.createElement('div')
+  el.className = 'textbox textbox-' + it.kind
+  el.style.left = it.left + 'px'
+  el.style.top = it.top + 'px'
+  el.style.fontSize = it.fontSize + 'px'
+  el.style.color = it.kind === 'existing' && !it.changed ? 'transparent' : it.color
+  el.textContent = it.text
+  page.layer.appendChild(el)
+  it.el = el
+  it.page = page
+  applyTextStyle(it)
+
   el.addEventListener('mousedown', (e) => {
-    if (tb.editing || e.target !== el) return
+    if (it.editing || e.target !== el) return
     e.preventDefault()
     e.stopPropagation()
-    selectBox(tb)
-    if (tb.kind === 'existing') {
-      enterEdit(tb)
+    selectBox(it)
+    if (it.kind === 'existing') {
+      enterEdit(it)
     } else {
-      startDrag(e, tb)
+      const origLeft = it.left
+      const origTop = it.top
+      startDrag(e, it, (dx, dy) => {
+        it.left = Math.max(0, origLeft + dx)
+        it.top = Math.max(0, origTop + dy)
+        it.el.style.left = it.left + 'px'
+        it.el.style.top = it.top + 'px'
+      }, () => commit())
     }
   })
   el.addEventListener('dblclick', (e) => {
     e.preventDefault()
     e.stopPropagation()
-    selectBox(tb)
-    enterEdit(tb)
+    selectBox(it)
+    enterEdit(it)
   })
+  return el
 }
 
 function addTextbox(page, x, y) {
-  const tb = {
+  const it = {
+    type: 'text',
     kind: 'new',
-    page,
     left: x,
     top: y,
     fontSize: 16,
     color: '#000000',
     text: DEFAULT_TEXT,
+    origText: DEFAULT_TEXT,
+    changed: false,
+    bold: false,
+    italic: false,
+    underline: false,
     editing: false,
-    el: null,
   }
-  const el = document.createElement('div')
-  el.className = 'textbox textbox-new'
-  el.style.left = x + 'px'
-  el.style.top = y + 'px'
-  el.style.fontSize = tb.fontSize + 'px'
-  el.style.color = tb.color
-  el.textContent = tb.text
-  page.layer.appendChild(el)
-  tb.el = el
-  page.textboxes.push(tb)
-  setupBoxEvents(page, tb)
-  selectBox(tb)
-  enterEdit(tb)
+  page.items.push(it)
+  createTextEl(page, it)
+  commit()
+  selectBox(it)
+  enterEdit(it)
 }
 
-function removeTextbox(page, tb) {
-  const idx = page.textboxes.indexOf(tb)
-  if (idx === -1) return
-  page.textboxes.splice(idx, 1)
-  tb.el.remove()
-  if (selected === tb) selectBox(null)
+function rebuildText(page, it) {
+  const copy = { ...it }
+  page.items.push(copy)
+  createTextEl(page, copy)
+  if (copy.kind === 'existing') {
+    copy.redact = null
+    if (copy.changed) paintRedact(page, copy)
+  }
+}
+
+function rebuildShape(page, it) {
+  const copy = { ...it }
+  page.items.push(copy)
+  createShapeEl(page, copy)
 }
 
 function deleteSelected() {
   if (!selected || selected.kind === 'existing') return
   for (const page of pages) {
-    if (page.textboxes.includes(selected)) {
-      removeTextbox(page, selected)
+    const idx = page.items.indexOf(selected)
+    if (idx !== -1) {
+      page.items.splice(idx, 1)
+      selected.el.remove()
+      selectBox(null)
+      commit()
       return
     }
   }
 }
 
 function applyProps() {
-  if (!selected) return
+  if (!selected || selected.type !== 'text') return
   const size = parseInt(fontSizeSel.value, 10) || 16
   selected.fontSize = size
   selected.el.style.fontSize = size + 'px'
   selected.color = fontColorInput.value
   selected.el.style.color = selected.color
-  if (selected.kind === 'existing' && selected.changed) {
-    updateRedactFromEl(selected)
-  }
+  commit()
 }
+
+function toggleFormat(which) {
+  if (!selected || selected.type !== 'text') return
+  selected[which] = !selected[which]
+  applyTextStyle(selected)
+  selectBox(selected)
+  commit()
+}
+
+/* ===== Shapes ===== */
+
+function setPlaceMode(mode) {
+  placeMode = placeMode === mode ? null : mode
+  Object.entries(shapeBtns).forEach(([k, btn]) => btn.classList.toggle('active', k === placeMode))
+}
+
+function createShapeEl(page, shape) {
+  const el = document.createElement('div')
+  el.className = 'shape-el shape-' + shape.shapeType
+  page.layer.appendChild(el)
+  shape.el = el
+  shape.page = page
+  shape.handles = document.createElement('div')
+  shape.handles.className = 'shape-handles'
+  for (const pos of ['se', 'nw', 'ne', 'sw']) {
+    const h = document.createElement('span')
+    h.className = 'shape-handle shape-handle-' + pos
+    shape.handles.appendChild(h)
+  }
+  updateShapeEl(shape)
+  setupShapeEvents(shape)
+  return el
+}
+
+function updateShapeEl(shape) {
+  const el = shape.el
+  const left = Math.min(shape.x1, shape.x2)
+  const top = Math.min(shape.y1, shape.y2)
+  const w = Math.abs(shape.x2 - shape.x1) || 1
+  const h = Math.abs(shape.y2 - shape.y1) || 1
+  el.style.left = left + 'px'
+  el.style.top = top + 'px'
+  el.style.width = w + 'px'
+  el.style.height = h + 'px'
+
+  if (shape.shapeType === 'line' || shape.shapeType === 'arrow') {
+    el.innerHTML = ''
+    const svg = document.createElementNS(SVGNS, 'svg')
+    svg.setAttribute('width', '100%')
+    svg.setAttribute('height', '100%')
+    svg.style.overflow = 'visible'
+    const line = document.createElementNS(SVGNS, 'line')
+    line.setAttribute('x1', shape.x1 - left)
+    line.setAttribute('y1', shape.y1 - top)
+    line.setAttribute('x2', shape.x2 - left)
+    line.setAttribute('y2', shape.y2 - top)
+    line.setAttribute('stroke', shape.strokeColor)
+    line.setAttribute('stroke-width', String(shape.strokeWidth))
+    svg.appendChild(line)
+    if (shape.shapeType === 'arrow') {
+      const ang = Math.atan2(shape.y2 - shape.y1, shape.x2 - shape.x1)
+      const len = shape.strokeWidth * 5
+      for (const off of [0.45, -0.45]) {
+        const l2 = document.createElementNS(SVGNS, 'line')
+        l2.setAttribute('x1', shape.x2 - left)
+        l2.setAttribute('y1', shape.y2 - top)
+        l2.setAttribute('x2', (shape.x2 - left) - len * Math.cos(ang + off))
+        l2.setAttribute('y2', (shape.y2 - top) - len * Math.sin(ang + off))
+        l2.setAttribute('stroke', shape.strokeColor)
+        l2.setAttribute('stroke-width', String(shape.strokeWidth))
+        svg.appendChild(l2)
+      }
+    }
+    el.appendChild(svg)
+  } else {
+    el.style.border = shape.strokeWidth + 'px solid ' + shape.strokeColor
+    el.style.borderRadius = shape.shapeType === 'ellipse' ? '50%' : '0'
+  }
+  if (!shape.handles.parentNode) el.appendChild(shape.handles)
+}
+
+function setupShapeEvents(shape) {
+  const el = shape.el
+  el.addEventListener('mousedown', (e) => {
+    if (e.target.classList.contains('shape-handle')) return
+    e.preventDefault()
+    e.stopPropagation()
+    selectBox(shape)
+    const dx0 = shape.x1
+    const dy0 = shape.y1
+    const dx1 = shape.x2
+    const dy1 = shape.y2
+    startDrag(e, shape, (dx, dy) => {
+      shape.x1 = dx0 + dx
+      shape.y1 = dy0 + dy
+      shape.x2 = dx1 + dx
+      shape.y2 = dy1 + dy
+      updateShapeEl(shape)
+    }, () => commit())
+  })
+  el.addEventListener('dblclick', (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+  })
+  el.querySelectorAll('.shape-handle').forEach((handle) => {
+    handle.addEventListener('mousedown', (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      selectBox(shape)
+      const cls = Array.from(handle.classList).find((c) => c.startsWith('shape-handle-'))
+      const which = cls.replace('shape-handle-', '')
+      startShapeResize(shape, which, e)
+    })
+  })
+}
+
+function startShapeResize(shape, handle, e) {
+  const startX = e.clientX
+  const startY = e.clientY
+  const rect = shape.page.layer.getBoundingClientRect()
+  const anchorX = handle.includes('w') ? shape.x2 : shape.x1
+  const anchorY = handle.includes('n') ? shape.y2 : shape.y1
+  const onMove = (ev) => {
+    const mx = ev.clientX - rect.left
+    const my = ev.clientY - rect.top
+    shape.x1 = handle.includes('w') ? mx : anchorX
+    shape.y1 = handle.includes('n') ? my : anchorY
+    shape.x2 = handle.includes('e') ? mx : anchorX
+    shape.y2 = handle.includes('s') ? my : anchorY
+    updateShapeEl(shape)
+  }
+  const onUp = () => {
+    document.removeEventListener('mousemove', onMove)
+    document.removeEventListener('mouseup', onUp)
+    commit()
+  }
+  document.addEventListener('mousemove', onMove)
+  document.addEventListener('mouseup', onUp)
+}
+
+function addShape(page, mode, x1, y1, x2, y2) {
+  const shape = {
+    type: 'shape',
+    shapeType: mode,
+    x1,
+    y1,
+    x2,
+    y2,
+    strokeColor: fontColorInput.value,
+    strokeWidth: 2,
+  }
+  page.items.push(shape)
+  createShapeEl(page, shape)
+  commit()
+  selectBox(shape)
+}
+
+/* ===== Page rendering ===== */
 
 function selectPage(i) {
   if (i < 0 || i >= pages.length) return
@@ -266,71 +630,6 @@ function selectPage(i) {
   stageEl.scrollTop = 0
 }
 
-function buildRedactRect(item, scale) {
-  const size = item.size
-  const ascent = size * 0.8
-  const descent = size * 0.22
-  const pad = REDACT_PAD * scale
-  const x = (item.x0 - REDACT_PAD) * scale
-  const y = (item.pageH - item.baseline - ascent - REDACT_PAD) * scale
-  const w = (item.widthPts + REDACT_PAD * 2) * scale
-  const h = (ascent + descent + REDACT_PAD * 2) * scale
-  return { x, y, w, h }
-}
-
-function createExistingBox(page, line) {
-  const sizePx = line.size * page.scale
-  const topPx = (line.pageH - line.baseline - line.size * 0.8) * page.scale
-  const leftPx = line.x0 * page.scale
-
-  const tb = {
-    kind: 'existing',
-    page,
-    left: leftPx,
-    top: topPx,
-    fontSize: sizePx,
-    color: '#000000',
-    text: line.text,
-    origText: line.text,
-    editing: false,
-    changed: false,
-    fontName: line.fontName,
-    x0: line.x0,
-    baseline: line.baseline,
-    sizePts: line.size,
-    widthPts: line.widthPts,
-    redact: null,
-    el: null,
-  }
-  const el = document.createElement('div')
-  el.className = 'textbox textbox-existing'
-  el.style.left = leftPx + 'px'
-  el.style.top = topPx + 'px'
-  el.style.fontSize = sizePx + 'px'
-  el.style.lineHeight = '1.2'
-  el.style.color = 'transparent'
-  el.textContent = tb.text
-  page.layer.appendChild(el)
-  tb.el = el
-  tb.redact = buildRedactRect(line, page.scale)
-  page.textboxes.push(tb)
-  setupBoxEvents(page, tb)
-}
-
-function updateRedactFromEl(tb) {
-  const wrap = tb.page.wrap
-  const wrapRect = wrap.getBoundingClientRect()
-  const elRect = tb.el.getBoundingClientRect()
-  const pad = REDACT_PAD * tb.page.scale
-  tb.redact = {
-    x: elRect.left - wrapRect.left - pad,
-    y: elRect.top - wrapRect.top - pad,
-    w: elRect.width + pad * 2,
-    h: elRect.height + pad * 2,
-  }
-  paintRedact(tb)
-}
-
 function groupTextItems(items, pageH) {
   const usable = items
     .map((it) => {
@@ -340,10 +639,14 @@ function groupTextItems(items, pageH) {
       if (size < 1) return null
       const str = (it.str || '').replace(/\u00a0/g, ' ')
       if (!str.trim()) return null
-      const x0 = t[4]
-      const baseline = t[5]
-      const widthPts = (it.width * Math.abs(t[0])) / size
-      return { x0, baseline, size, widthPts, str, fontName: it.fontName }
+      return {
+        x0: t[4],
+        baseline: t[5],
+        size,
+        widthPts: (it.width * Math.abs(t[0])) / size,
+        str,
+        fontName: it.fontName,
+      }
     })
     .filter(Boolean)
 
@@ -355,12 +658,41 @@ function groupTextItems(items, pageH) {
     if (line) {
       line.widthPts = Math.max(line.widthPts, it.x0 + it.widthPts - line.x0)
       line.text += ' ' + it.str
-      line.items.push(it)
     } else {
-      lines.push({ x0: it.x0, baseline: it.baseline, size: it.size, widthPts: it.widthPts, text: it.str, fontName: it.fontName, items: [it], pageH })
+      lines.push({ x0: it.x0, baseline: it.baseline, size: it.size, widthPts: it.widthPts, text: it.str, fontName: it.fontName, pageH })
     }
   }
   return lines
+}
+
+function createExistingBox(page, line) {
+  const sizePx = line.size * page.scale
+  const topPx = (line.pageH - line.baseline - line.size * ASCENT) * page.scale
+  const leftPx = line.x0 * page.scale
+
+  const it = {
+    type: 'text',
+    kind: 'existing',
+    left: leftPx,
+    top: topPx,
+    fontSize: sizePx,
+    color: '#000000',
+    text: line.text,
+    origText: line.text,
+    changed: false,
+    bold: false,
+    italic: false,
+    underline: false,
+    editing: false,
+    fontName: line.fontName,
+    x0: line.x0,
+    baseline: line.baseline,
+    sizePts: line.size,
+    widthPts: line.widthPts,
+    pageH: line.pageH,
+  }
+  page.items.push(it)
+  createTextEl(page, it)
 }
 
 async function renderPage(i) {
@@ -394,15 +726,65 @@ async function renderPage(i) {
   layer.className = 'text-layer'
   wrap.appendChild(layer)
 
-  const page = { scale, widthPts, heightPts, layer, textboxes: [], wrap, redactCtx: redactCanvas.getContext('2d') }
+  const page = {
+    scale,
+    widthPts,
+    heightPts,
+    layer,
+    items: [],
+    wrap,
+    redactCtx: redactCanvas.getContext('2d'),
+  }
   pages.push(page)
 
   stageEl.appendChild(wrap)
 
   layer.addEventListener('click', (e) => {
-    if (e.target !== layer) return
+    if (e.target !== layer || placeMode || justDrewShape) return
     const rect = layer.getBoundingClientRect()
     addTextbox(page, e.clientX - rect.left, e.clientY - rect.top)
+  })
+
+  layer.addEventListener('mousedown', (e) => {
+    if (!placeMode || e.target !== layer) return
+    e.preventDefault()
+    const rect = layer.getBoundingClientRect()
+    const mx = e.clientX - rect.left
+    const my = e.clientY - rect.top
+    const anchorX = mx
+    const anchorY = my
+    let endX = mx
+    let endY = my
+    const shape = {
+      type: 'shape',
+      shapeType: placeMode,
+      x1: anchorX,
+      y1: anchorY,
+      x2: endX,
+      y2: endY,
+      strokeColor: fontColorInput.value,
+      strokeWidth: 2,
+    }
+    page.items.push(shape)
+    createShapeEl(page, shape)
+    const onMove = (ev) => {
+      endX = ev.clientX - rect.left
+      endY = ev.clientY - rect.top
+      shape.x2 = endX
+      shape.y2 = endY
+      updateShapeEl(shape)
+    }
+    const onUp = () => {
+      document.removeEventListener('mousemove', onMove)
+      document.removeEventListener('mouseup', onUp)
+      setPlaceMode(null)
+      justDrewShape = true
+      setTimeout(() => { justDrewShape = false }, 0)
+      commit()
+      selectBox(shape)
+    }
+    document.addEventListener('mousemove', onMove)
+    document.addEventListener('mouseup', onUp)
   })
 
   const thumbScale = THUMB_WIDTH / widthPts
@@ -457,6 +839,7 @@ async function loadPdf(file) {
     }
     setLoading(false)
     selectPage(0)
+    commit()
     setEditorOpen(true)
   } catch (err) {
     console.error('Failed to load PDF:', err)
@@ -472,21 +855,28 @@ function resetState() {
   pages = []
   selected = null
   activeIndex = 0
+  placeMode = null
+  justDrewShape = false
+  history = []
+  historyIndex = -1
   thumbList.innerHTML = ''
   stageEl.innerHTML = ''
   fileInput.value = ''
+  Object.values(shapeBtns).forEach((b) => b.classList.remove('active'))
 }
+
+/* ===== Export ===== */
 
 async function exportPdf() {
   if (!pdfLibDoc) return
   downloadBtn.disabled = true
   try {
     const out = await PDFDocument.create()
-    const fonts = {}
-    const fontCache = async (name) => {
-      const key = mapFont(name)
-      if (!fonts[key]) fonts[key] = await out.embedFont(key)
-      return fonts[key]
+    const fontCache = {}
+    const getFont = async (family, bold, italic) => {
+      const std = pickFont(family, bold, italic)
+      if (!fontCache[std]) fontCache[std] = await out.embedFont(std)
+      return fontCache[std]
     }
     const white = rgb(1, 1, 1)
 
@@ -496,58 +886,68 @@ async function exportPdf() {
     }
     for (let i = 0; i < pages.length; i++) {
       const page = pages[i]
-      if (!page.textboxes.length) continue
+      if (!page.items.length) continue
       const outPage = out.getPage(i)
       const pageH = outPage.getHeight()
       const scale = page.scale
       const lineHeight = 1.25
 
-      for (const tb of page.textboxes) {
-        const lines = tb.text.split('\n')
-        if (tb.kind === 'existing') {
-          if (!tb.changed) continue
-          const font = await fontCache(tb.fontName)
+      for (const it of page.items) {
+        if (it.type === 'shape') {
+          exportShape(outPage, it, scale, pageH)
+          continue
+        }
+        const lines = it.text.split('\n')
+        if (it.kind === 'existing') {
+          if (!it.changed) continue
+          const family = mapFamily(it.fontName)
+          const font = await getFont(family, it.bold, it.italic)
           const pad = REDACT_PAD
-          const ascent = tb.sizePts * 0.8
-          const descent = tb.sizePts * 0.22
+          const ascent = it.sizePts * ASCENT
+          const descent = it.sizePts * DESCENT
           outPage.drawRectangle({
-            x: tb.x0 - pad,
-            y: tb.baseline - descent - pad,
-            width: tb.widthPts + pad * 2,
+            x: it.x0 - pad,
+            y: it.baseline - descent - pad,
+            width: it.widthPts + pad * 2,
             height: ascent + descent + pad * 2,
             color: white,
           })
-          const size = tb.fontSize / scale
-          let baseline = tb.baseline
+          const size = it.fontSize / scale
+          let baseline = it.baseline
           for (const line of lines) {
             if (line.length) {
-              outPage.drawText(line, {
-                x: tb.x0,
-                y: baseline,
-                size,
-                font,
-                color: hexToRgb(tb.color),
-                lineHeight: size * lineHeight,
-              })
+              outPage.drawText(line, { x: it.x0, y: baseline, size, font, color: hexToRgb(it.color), lineHeight: size * lineHeight })
+              if (it.underline) {
+                const w = font.widthOfTextAtSize(line, size)
+                outPage.drawLine({
+                  start: { x: it.x0, y: baseline - size * 0.12 },
+                  end: { x: it.x0 + w, y: baseline - size * 0.12 },
+                  thickness: Math.max(0.7, size * 0.05),
+                  color: hexToRgb(it.color),
+                })
+              }
             }
             baseline -= size * lineHeight
           }
         } else {
-          const font = await fontCache(StandardFonts.Helvetica)
-          const size = tb.fontSize / scale
-          const x = tb.left / scale
-          const topPts = tb.top / scale
+          const family = mapFamily(it.fontName)
+          const font = await getFont(family, it.bold, it.italic)
+          const size = it.fontSize / scale
+          const x = it.left / scale
+          const topPts = it.top / scale
           let baseline = pageH - topPts - size
           for (const line of lines) {
             if (line.length) {
-              outPage.drawText(line, {
-                x,
-                y: baseline,
-                size,
-                font,
-                color: hexToRgb(tb.color),
-                lineHeight: size * lineHeight,
-              })
+              outPage.drawText(line, { x, y: baseline, size, font, color: hexToRgb(it.color), lineHeight: size * lineHeight })
+              if (it.underline) {
+                const w = font.widthOfTextAtSize(line, size)
+                outPage.drawLine({
+                  start: { x, y: baseline - size * 0.12 },
+                  end: { x: x + w, y: baseline - size * 0.12 },
+                  thickness: Math.max(0.7, size * 0.05),
+                  color: hexToRgb(it.color),
+                })
+              }
             }
             baseline -= size * lineHeight
           }
@@ -561,6 +961,46 @@ async function exportPdf() {
     showError('Could not export the edited PDF. Please try again.')
   } finally {
     downloadBtn.disabled = false
+  }
+}
+
+function exportShape(outPage, shape, scale, pageH) {
+  const p1 = { x: shape.x1 / scale, y: pageH - shape.y1 / scale }
+  const p2 = { x: shape.x2 / scale, y: pageH - shape.y2 / scale }
+  const color = hexToRgb(shape.strokeColor)
+  const thickness = shape.strokeWidth / scale
+  if (shape.shapeType === 'rect') {
+    outPage.drawRectangle({
+      x: Math.min(p1.x, p2.x),
+      y: Math.min(p1.y, p2.y),
+      width: Math.abs(p2.x - p1.x),
+      height: Math.abs(p2.y - p1.y),
+      borderColor: color,
+      borderWidth: thickness,
+    })
+  } else if (shape.shapeType === 'ellipse') {
+    outPage.drawEllipse({
+      x: (p1.x + p2.x) / 2,
+      y: (p1.y + p2.y) / 2,
+      xScale: Math.abs(p2.x - p1.x) / 2,
+      yScale: Math.abs(p2.y - p1.y) / 2,
+      borderColor: color,
+      borderWidth: thickness,
+    })
+  } else {
+    outPage.drawLine({ start: p1, end: p2, thickness, color })
+    if (shape.shapeType === 'arrow') {
+      const ang = Math.atan2(p2.y - p1.y, p2.x - p1.x)
+      const len = thickness * 5
+      for (const off of [0.45, -0.45]) {
+        outPage.drawLine({
+          start: p2,
+          end: { x: p2.x - len * Math.cos(ang + off), y: p2.y - len * Math.sin(ang + off) },
+          thickness,
+          color,
+        })
+      }
+    }
   }
 }
 
@@ -598,24 +1038,79 @@ addTextBtn.addEventListener('click', () => {
 
 deleteBtn.addEventListener('click', deleteSelected)
 downloadBtn.addEventListener('click', exportPdf)
+undoBtn.addEventListener('click', undo)
+redoBtn.addEventListener('click', redo)
 closeBtn.addEventListener('click', () => {
   setEditorOpen(false)
   document.getElementById('tool').scrollIntoView({ behavior: 'smooth' })
 })
 
+boldBtn.addEventListener('click', () => toggleFormat('bold'))
+italicBtn.addEventListener('click', () => toggleFormat('italic'))
+underlineBtn.addEventListener('click', () => toggleFormat('underline'))
+
 fontSizeSel.addEventListener('change', applyProps)
-fontColorInput.addEventListener('input', applyProps)
+fontColorInput.addEventListener('change', applyProps)
+fontColorInput.addEventListener('input', () => {
+  if (selected && selected.type === 'text') {
+    selected.color = fontColorInput.value
+    selected.el.style.color = selected.color
+  } else if (selected && selected.type === 'shape') {
+    selected.strokeColor = fontColorInput.value
+    updateShapeEl(selected)
+  }
+})
+
+Object.entries(shapeBtns).forEach(([mode, btn]) => {
+  btn.addEventListener('click', () => setPlaceMode(mode))
+})
 
 document.addEventListener('keydown', (e) => {
+  const mod = e.ctrlKey || e.metaKey
+  if (mod && e.key === 'z') {
+    e.preventDefault()
+    if (e.shiftKey) redo()
+    else undo()
+    return
+  }
+  if (mod && e.key === 'y') {
+    e.preventDefault()
+    redo()
+    return
+  }
+  if (mod && e.key === 'b') {
+    if (selected && selected.type === 'text') {
+      e.preventDefault()
+      toggleFormat('bold')
+    }
+    return
+  }
+  if (mod && e.key === 'i') {
+    if (selected && selected.type === 'text') {
+      e.preventDefault()
+      toggleFormat('italic')
+    }
+    return
+  }
+  if (mod && e.key === 'u') {
+    if (selected && selected.type === 'text') {
+      e.preventDefault()
+      toggleFormat('underline')
+    }
+    return
+  }
   if (e.key === 'Delete' || e.key === 'Backspace') {
     if (selected && !selected.editing && document.activeElement !== fontSizeSel && document.activeElement !== fontColorInput) {
       e.preventDefault()
       deleteSelected()
     }
   }
-  if (e.key === 'Escape' && selected) {
-    if (selected.editing) exitEdit(selected)
-    selectBox(null)
+  if (e.key === 'Escape') {
+    if (placeMode) setPlaceMode(null)
+    if (selected) {
+      if (selected.editing) exitEdit(selected)
+      selectBox(null)
+    }
   }
 })
 

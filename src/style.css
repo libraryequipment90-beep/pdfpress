@@ -1297,21 +1297,25 @@ body.editor-open {
 
 .textbox-existing {
   cursor: text;
-  border: 1.5px dashed transparent;
+  border: 0;
+  padding: 0;
+  min-width: 0;
+  min-height: 0;
+  line-height: 1;
 }
 
 .textbox-existing:hover {
-  border-color: rgba(59, 130, 246, 0.55);
+  outline: 1.5px dashed rgba(59, 130, 246, 0.55);
   background: rgba(59, 130, 246, 0.08);
 }
 
 .textbox-existing.selected {
-  border-color: #3b82f6;
+  outline: 1.5px solid #3b82f6;
   background: rgba(59, 130, 246, 0.12);
 }
 
 .textbox-existing.editing {
-  border-color: #3b82f6;
+  outline: 1.5px solid #3b82f6;
   background: rgba(255, 255, 255, 0.75);
   user-select: text;
 }
@@ -1325,6 +1329,86 @@ body.editor-open {
   cursor: text;
   user-select: text;
   border-color: #3b82f6;
+}
+
+/* ===== Shapes ===== */
+.shape-el {
+  position: absolute;
+  cursor: move;
+  line-height: 0;
+}
+
+.shape-rect,
+.shape-ellipse {
+  background: transparent;
+}
+
+.shape-el svg {
+  display: block;
+}
+
+.shape-handles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: none;
+}
+
+.shape-el.selected .shape-handles {
+  display: block;
+}
+
+.shape-handle {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  background: #fff;
+  border: 1.5px solid #3b82f6;
+  border-radius: 2px;
+  pointer-events: auto;
+  cursor: nwse-resize;
+}
+
+.shape-handle-se {
+  right: -5px;
+  bottom: -5px;
+  cursor: nwse-resize;
+}
+
+.shape-handle-nw {
+  left: -5px;
+  top: -5px;
+  cursor: nwse-resize;
+}
+
+.shape-handle-ne {
+  right: -5px;
+  top: -5px;
+  cursor: nesw-resize;
+}
+
+.shape-handle-sw {
+  left: -5px;
+  bottom: -5px;
+  cursor: nesw-resize;
+}
+
+.fmt-btn.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.shape-btn.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+}
+
+.tool-sep {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
 }
 
 .prop-field {
