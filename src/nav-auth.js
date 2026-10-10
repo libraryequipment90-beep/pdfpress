@@ -25,6 +25,12 @@ export function initNavToggle() {
     links.classList.toggle('open')
   })
   links.addEventListener('click', (e) => {
+    const drop = e.target.closest('.nav-dropdown')
+    if (drop && e.target.closest('.nav-drop-toggle')) {
+      e.preventDefault()
+      drop.classList.toggle('open')
+      return
+    }
     if (e.target.closest('a')) {
       links.classList.remove('open')
     }

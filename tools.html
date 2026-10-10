@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Image Tools — Resize, Crop, Convert, Compress Online for Free</title>
+  <meta name="description" content="Free image tools in your browser. Resize, crop, compress, convert, flip, rotate and more. No upload — 100% private." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖼️</text></svg>" />
+</head>
+<body>
+  <header class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="/">
+        <span class="brand-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="8" y1="13" x2="16" y2="13"></line>
+            <line x1="8" y1="17" x2="16" y2="17"></line>
+          </svg>
+        </span>
+        <span class="brand-name">PDF<em>press</em></span>
+      </a>
+      <nav class="nav-links" id="nav-links">
+        <a href="/#tool">Compress PDF</a>
+        <div class="nav-dropdown">
+          <a href="/tools" class="nav-drop-toggle">Image Tools</a>
+          <div class="nav-dropdown-menu">
+            <span class="drop-label">Image</span>
+            <a href="/resize">Image Resizer</a>
+            <a href="/compress-image">Compressor</a>
+            <a href="/crop">Crop Image</a>
+            <a href="/flip">Flip Image</a>
+            <a href="/rotate">Rotate Image</a>
+            <a href="/enlarge">Enlarger</a>
+            <a href="/color-picker">Color Picker</a>
+            <a href="/meme">Meme Generator</a>
+            <span class="drop-label">Convert</span>
+            <a href="/convert">Image Converter</a>
+            <a href="/pdf-to-jpg">PDF to JPG</a>
+            <a href="/heic-to-jpg">HEIC to JPG</a>
+            <a href="/svg-converter">SVG Converter</a>
+            <a href="/pdf-to-png">PDF to PNG</a>
+            <a href="/png-to-svg">PNG to SVG</a>
+            <a href="/image-to-pdf">Image to PDF</a>
+            <a href="/pdf-to-gif">PDF to GIF</a>
+          </div>
+        </div>
+        <a href="/edit-pdf">Edit PDF</a>
+        <a href="/tools">All tools</a>
+        <a id="nav-profile-btn" href="/profile" class="nav-profile-link hidden">Profile</a>
+      </nav>
+      <div class="nav-actions">
+        <a id="nav-login-btn" href="/signup" class="btn btn-outline btn-sm">Log in</a>
+        <a id="nav-auth-btn" href="/signup" class="btn btn-primary btn-sm">Sign up</a>
+        <button type="button" id="nav-toggle" class="nav-toggle" aria-label="Toggle menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero" id="top">
+    <div class="container hero-inner">
+      <h1 class="hero-title">Image Tools</h1>
+      <p class="hero-sub">Resize, crop, compress, convert and edit images in your browser.</p>
+      <p class="hero-note">Free · No upload · 100% private · Works on any device</p>
+    </div>
+  </section>
+
+  <main class="container">
+    <section class="tool-card" id="tool">
+      <div class="tool-head">
+        <h2>All free image tools</h2>
+        <p>Every tool runs locally in your browser using free open-source libraries. Your files never leave your device.</p>
+      </div>
+
+      <p class="tools-group-title">Image tools</p>
+      <div class="tools-grid">
+        <a class="tool-tile" href="/resize">
+          <span class="tool-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg></span>
+          <h3>Image Resizer</h3>
+          <p>Change width, height, DPI and format.</p>
+        </a>
+        <a class="tool-tile" href="/compress-image">
+          <span class="tool-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 14 10 14 10 20"></polyline><polyline points="20 10 14 10 14 4"></polyline><line x1="14" y1="10" x2="21" y2="3"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg></span>
+          <h3>Image Compressor</h3>
+          <p>Shrink JPG, PNG and WebP file size.</p>
+        </a>
+        <a class="tool-tile" href="/crop">
+          <span class="tool-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2v14a2 2 0 0 0 2 2h14"></path><path d="M18 22V8a2 2 0 0 0-2-2H2"></path></svg></span>
+          <h3>Crop Image</h3>
+          <p>Cut any area and download the result.</p>
+        </a>
+        <a class="tool-tile" href="/flip">
+          <span class="tool-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 3 21 3 21 8"></polyline><line x1="4" y1="20" x2="21" y2="3"></line><polyline points="21 16 21 21 16 21"></polyline><line x1="15" y1="15" x2="21" y2="21"></line><line x1="4" y1="4" x2="9" y2="9"></line></svg></span>
+          <h3>Flip Image</h3>
+          <p>Mirror photos horizontally or vertically.</p>
+        </a>
+        <a class="tool-tile" href="/rotate">
+          <span class="tool-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg></span>
+          <h3>Rotate Image</h3>
+          <p>Turn images 90, 180 or 270 degrees.</p>
+        </a>
+        <a class="tool-tile" href="/enlarge">
+          <span class="tool-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg></span>
+          <h3>Image Enlarger</h3>
+          <p>Upscale 2x or 4x in the browser.</p>
+        </a>
+        <a class="tool-tile" href="/color-picker">
+          <span class="tool-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg></span>
+          <h3>Color Picker</h3>
+          <p>Click any pixel to copy HEX, RGB or HSL.</p>
+        </a>
+        <a class="tool-tile" href="/meme">
+          <span class="tool-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg></span>
+          <h3>Meme Generator</h3>
+          <p>Add top and bottom caption text.</p>
+        </a>
+      </div>
+
+      <p class="tools-group-title">Convert</p>
+      <div class="tools-grid">
+        <a class="tool-tile" href="/convert">
+          <span class="tool-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path><polyline points="7 23 3 19 7 15"></polyline><path d="M21 13v2a4 4 0 0 1-4 4H3"></path></svg></span>
+          <h3>Image Converter</h3>
+          <p>JPG, PNG, WebP and more.</p>
+        </a>
+        <a class="tool-tile" href="/pdf-to-jpg">
+          <span class="tool-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></span>
+          <h3>PDF to JPG</h3>
+          <p>Export every PDF page as a JPG.</p>
+        </a>
+        <a class="tool-tile" href="/pdf-to-png">
+          <span class="tool-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect></svg></span>
+          <h3>PDF to PNG</h3>
+          <p>Export PDF pages as PNG images.</p>
+        </a>
+        <a class="tool-tile" href="/pdf-to-gif">
+          <span class="tool-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg></span>
+          <h3>PDF to GIF</h3>
+          <p>Turn PDF pages into an animated GIF.</p>
+        </a>
+        <a class="tool-tile" href="/heic-to-jpg">
+          <span class="tool-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle></svg></span>
+          <h3>HEIC to JPG</h3>
+          <p>Convert iPhone HEIC photos to JPG.</p>
+        </a>
+        <a class="tool-tile" href="/svg-converter">
+          <span class="tool-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg></span>
+          <h3>SVG Converter</h3>
+          <p>Turn SVG into JPG, PNG or WebP.</p>
+        </a>
+        <a class="tool-tile" href="/png-to-svg">
+          <span class="tool-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg></span>
+          <h3>PNG to SVG</h3>
+          <p>Wrap a PNG inside a scalable SVG.</p>
+        </a>
+        <a class="tool-tile" href="/image-to-pdf">
+          <span class="tool-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></span>
+          <h3>Image to PDF</h3>
+          <p>Combine images into one PDF file.</p>
+        </a>
+        <a class="tool-tile" href="/webp-to-jpg">
+          <span class="tool-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path></svg></span>
+          <h3>WebP to JPG</h3>
+          <p>Convert WebP images to JPG.</p>
+        </a>
+        <a class="tool-tile" href="/png-to-jpg">
+          <span class="tool-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path></svg></span>
+          <h3>PNG to JPG</h3>
+          <p>Convert PNG images to JPG.</p>
+        </a>
+        <a class="tool-tile" href="/jpg-to-png">
+          <span class="tool-tile-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"></polyline><path d="M3 11V9a4 4 0 0 1 4-4h14"></path></svg></span>
+          <h3>JPG to PNG</h3>
+          <p>Convert JPG images to PNG.</p>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <p>© <span id="year"></span> PDFpress. All rights reserved.</p>
+      <p>Free image tools — private, fast, no upload.</p>
+    </div>
+  </footer>
+  <script type="module" src="/src/tools.js"></script>
+</body>
+</html>

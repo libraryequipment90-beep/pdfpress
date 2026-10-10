@@ -11,6 +11,8 @@
     "server": "node server/server.js"
   },
   "dependencies": {
+    "gifenc": "^1.0.3",
+    "heic2any": "^0.0.4",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^4.10.38",
     "vite": "^5.4.0"
